@@ -21,6 +21,9 @@ import br.com.ifpe.look.modelo.produto.CategoriaProdutoService;
 import br.com.ifpe.look.modelo.produto.Produto;
 import br.com.ifpe.look.modelo.produto.ProdutoService;
 import br.com.ifpe.look.util.entity.GenericController;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @RestController
 @RequestMapping("/api/produto")
@@ -29,10 +32,10 @@ public class ProdutoController extends GenericController {
    @Autowired
    private ProdutoService produtoService;
 
-    @Autowired
+   @Autowired
    private CategoriaProdutoService categoriaProdutoService;
 
-
+   @ApiOperation(value = "Serviço responsável por salvar um cliente no sistema.")
    @PostMapping
    public ResponseEntity<Produto> save(@RequestBody @Valid ProdutoRequest request) {
 
@@ -42,13 +45,21 @@ public class ProdutoController extends GenericController {
       return new ResponseEntity<Produto>(produto, HttpStatus.CREATED);
    }
 
+   @ApiOperation(value = "Serviço responsável por listar todos os clientes do sistema.")
    @GetMapping
    public List<Produto> listarTodos() {
 
       return produtoService.listarTodos();
    }
 
-   
+   @ApiOperation(value = "Serviço responsável por obter um cliente referente ao Id passado na URL.")
+   @ApiResponses(value = {
+         @ApiResponse(code = 200, message = "Retorna  o cliente."),
+         @ApiResponse(code = 401, message = "Acesso não autorizado."),
+         @ApiResponse(code = 403, message = "Você não tem permissão para acessar este recurso."),
+         @ApiResponse(code = 404, message = "Não foi encontrado um registro para o Id informado."),
+         @ApiResponse(code = 500, message = "Foi gerado um erro no servidor."),
+   })
    @GetMapping("/{id}")
    public Produto obterPorID(@PathVariable Long id) {
       return produtoService.obterPorID(id);
@@ -56,7 +67,7 @@ public class ProdutoController extends GenericController {
 
    @PutMapping("/{id}")
    public ResponseEntity<Produto> update(@PathVariable("id") Long id, @RequestBody ProdutoRequest request) {
-      
+
       Produto produto = request.build();
       produto.setCategoria(categoriaProdutoService.obterPorID(request.getIdCategoria()));
       produtoService.update(id, produto);
@@ -73,11 +84,11 @@ public class ProdutoController extends GenericController {
 
    @PostMapping("/filtrar")
    public List<Produto> filtrar(
-           @RequestParam(value = "codigo", required = false) String codigo,
-           @RequestParam(value = "titulo", required = false) String titulo,
-           @RequestParam(value = "idCategoria", required = false) Long idCategoria) {
+         @RequestParam(value = "codigo", required = false) String codigo,
+         @RequestParam(value = "titulo", required = false) String titulo,
+         @RequestParam(value = "idCategoria", required = false) Long idCategoria) {
 
-       return produtoService.filtrar(codigo, titulo, idCategoria);
+      return produtoService.filtrar(codigo, titulo, idCategoria);
    }
 
 }
